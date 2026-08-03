@@ -9,5 +9,9 @@ __pycache__/
 venv/
 .ipynb_checkpoints/
 
-# Redundant archive — same contents as the CSVs already tracked in this repo
+# Redundant archive: same contents as the CSVs already tracked in this repo
 gb_weather_dataset.zip
+
+# Large combined CSVs are shipped gzipped (.gz) instead of raw
+gb_weather_corrected.csv
+gb_weather_combined.csv

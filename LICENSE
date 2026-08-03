@@ -1,0 +1,20 @@
+Creative Commons Attribution 4.0 International (CC BY 4.0)
+
+Copyright (c) 2024-2025 nawazxz
+
+This dataset and accompanying analysis code are licensed under the Creative
+Commons Attribution 4.0 International License. You are free to share and adapt
+the material for any purpose, even commercially, provided you give appropriate
+credit, link to the license, and indicate if changes were made.
+
+Full license text: https://creativecommons.org/licenses/by/4.0/legalcode
+
+------------------------------------------------------------------------------
+Underlying data attribution
+------------------------------------------------------------------------------
+- Weather data retrieved via the Open-Meteo Historical Weather API
+  (https://open-meteo.com/), licensed CC BY 4.0.
+- Underlying reanalysis: ERA5, produced by the Copernicus Climate Change
+  Service (C3S) at ECMWF. Contains modified Copernicus Climate Change Service
+  information. Neither the European Commission nor ECMWF is responsible for any
+  use of the Copernicus information or data in this repository.

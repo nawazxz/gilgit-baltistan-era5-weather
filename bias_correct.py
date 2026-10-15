@@ -4,9 +4,9 @@ ERA5 Bias Correction — Gilgit-Baltistan Weather Dataset
 ========================================================
 Method: Monthly Delta Bias Correction (per-station, per-variable)
 
-The ERA5 reanalysis has a known discontinuity around 2016 caused by updates
-to the ECMWF data assimilation system. This script corrects the pre-2016 data
-to align with the post-2016 baseline using a monthly delta approach:
+The ERA5 reanalysis has a known discontinuity between 2016 and 2017 caused by updates
+to the ECMWF data assimilation system. This script corrects the pre-2017 data
+to align with the post-2017 baseline using a monthly delta approach:
 
   For additive variables (temperature, wind, radiation, etc.):
       delta(month) = mean_post(month) - mean_pre(month)
@@ -37,7 +37,7 @@ from datetime import datetime
 
 # ── Config ────────────────────────────────────────────────────────────────────
 DATA_DIR     = os.path.dirname(os.path.abspath(__file__))
-BREAK_DATE   = "2016-01-01"
+BREAK_DATE   = "2017-01-01"
 MIN_YEARS    = 3   # minimum years of data required in each period to correct
 
 # Variables corrected additively (shift by delta)
@@ -142,14 +142,14 @@ def compute_corrections(station_name, rows):
             val = safe_float(row.get(var))
             if val is None:
                 continue
-            if period == "pre_2016":
+            if period == "pre_2017":
                 pre[var][month].append(val)
-            elif period == "post_2016":
+            elif period == "post_2017":
                 post[var][month].append(val)
 
     # Check we have enough data in both periods
-    pre_years  = sum(1 for r in rows if r.get("era5_period") == "pre_2016")  / 365.25
-    post_years = sum(1 for r in rows if r.get("era5_period") == "post_2016") / 365.25
+    pre_years  = sum(1 for r in rows if r.get("era5_period") == "pre_2017")  / 365.25
+    post_years = sum(1 for r in rows if r.get("era5_period") == "post_2017") / 365.25
 
     corrections = {}
     diagnostics = {}
@@ -203,14 +203,14 @@ def compute_corrections(station_name, rows):
 
     return corrections, diagnostics
 
-# ── Step 3: Apply corrections to pre-2016 rows ───────────────────────────────
+# ── Step 3: Apply corrections to pre-2017 rows ───────────────────────────────
 def apply_corrections(rows, corrections):
     corrected = []
     for row in rows:
         new_row = dict(row)
         new_row["bias_corrected"] = "0"
 
-        if row.get("era5_period") == "pre_2016" and corrections:
+        if row.get("era5_period") == "pre_2017" and corrections:
             month = month_of(row["date"])
             new_row["bias_corrected"] = "1"
 
@@ -273,9 +273,9 @@ def validate(station_name, original_rows, corrected_rows, var="temperature_2m_me
                     buckets[month_of(r["date"])].append(v)
         return {m: round(mean(v), 3) for m, v in buckets.items() if v}
 
-    pre_before  = monthly_mean(original_rows,  "pre_2016")
-    pre_after   = monthly_mean(corrected_rows, "pre_2016")
-    post        = monthly_mean(original_rows,  "post_2016")
+    pre_before  = monthly_mean(original_rows,  "pre_2017")
+    pre_after   = monthly_mean(corrected_rows, "pre_2017")
+    post        = monthly_mean(original_rows,  "post_2017")
 
     month_names = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
     print(f"\n    Validation — {station_name} / {var}")
@@ -310,7 +310,7 @@ def main():
         print(f"  Computing monthly corrections ({len(rows):,} days)...")
         corrections, diagnostics = compute_corrections(station_name, rows)
 
-        print(f"  Applying corrections to pre-2016 rows...")
+        print(f"  Applying corrections to pre-2017 rows...")
         corrected_rows = apply_corrections(rows, corrections)
 
         # Validate temperature correction
@@ -324,8 +324,8 @@ def main():
 
         full_report[station_name] = {
             "total_rows":     len(rows),
-            "pre_2016_rows":  sum(1 for r in rows if r.get("era5_period") == "pre_2016"),
-            "post_2016_rows": sum(1 for r in rows if r.get("era5_period") == "post_2016"),
+            "pre_2017_rows":  sum(1 for r in rows if r.get("era5_period") == "pre_2017"),
+            "post_2017_rows": sum(1 for r in rows if r.get("era5_period") == "post_2017"),
             "corrections_applied": bool(corrections),
             "variables_corrected": len(corrections),
             "variable_details": diagnostics,
@@ -343,7 +343,7 @@ def main():
                 "break_date":   BREAK_DATE,
                 "generated":    datetime.utcnow().isoformat() + "Z",
                 "description":  (
-                    "Pre-2016 ERA5 data corrected to align with post-2016 baseline. "
+                    "Pre-2017 ERA5 data corrected to align with post-2017 baseline. "
                     "Additive correction for temperature/wind/radiation variables. "
                     "Multiplicative correction for precipitation/snowfall variables. "
                     "Corrections computed per calendar month to preserve seasonality."

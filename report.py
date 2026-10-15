@@ -3,13 +3,15 @@
 GB Climate Report — large poster format, single column, easy to read.
 """
 
+import os
+HERE = os.path.dirname(os.path.abspath(__file__))
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import textwrap
 
-OUT = "/Users/mac/Desktop/gb_weather_dataset/GB_Climate_Report.png"
+OUT = os.path.join(HERE, "GB_Climate_Report.png")
 
 def draw_report():
     # Wide, moderately tall — 2400 x 3400 px at 100 dpi
@@ -147,11 +149,11 @@ def draw_report():
 
     # ── STATS ─────────────────────────────────────────────────────────────────
     stat_row([
-        ("Real warming rate",   "+0.09°C / decade",  "#e74c3c"),
+        ("Real warming rate",   "+0.08°C / decade",  "#e74c3c"),
         ("Broken data claimed", "+1.42°C / decade",  "#888888"),
-        ("Rainfall trend",      "Down 2 – 6%",       "#3498db"),
-        ("Low-elev snowfall",   "Down 5 – 9%",       "#9b59b6"),
-        ("Most affected",       "Skardu & Gilgit",   "#e67e22"),
+        ("Rainfall 1990-2016",  "Down at all 5",     "#3498db"),
+        ("Low-elev snowfall",   "Down 12 – 18%",     "#9b59b6"),
+        ("Fastest warming",     "Gilgit & Chilas",   "#e67e22"),
         ("Most stable",         "Khunjerab 4693m",   "#27ae60"),
     ])
     gap(0.20)
@@ -162,7 +164,7 @@ def draw_report():
     section_header("01", "TEMPERATURE", "#c0392b")
     gap(0.06)
     ax.text(0.65, Y[0],
-            "GB is warming at +0.09°C per decade — the real number after fixing the data",
+            "+0.08°C per decade over 1990-2024 after fixing the data, likely an underestimate",
             ha="left", va="top", fontsize=15, fontweight="bold",
             color="#c0392b", style="italic")
     Y[0] -= 0.32
@@ -174,10 +176,10 @@ def draw_report():
            "amplifies any extra heat from greenhouse gases.",
            "#c0392b")
     gap(0.06)
-    reason(2, "Altitude Amplification",
-           "Higher mountains warm faster than lowlands. Every 1,000 metres of elevation makes "
-           "temperature changes feel stronger. That is why Hunza and Skardu are more sensitive "
-           "than Chilas despite being colder overall.",
+    reason(2, "Low Valleys Warmed Fastest Here",
+           "In the clean 1990-2016 record, Gilgit (+0.34°C per decade) and Chilas (+0.23°C) warmed "
+           "fastest, while Skardu, Hunza and Khunjerab barely moved. Studies usually find high "
+           "mountains warming faster, so treat these station-level numbers from a coarse grid with care.",
            "#c0392b")
     gap(0.06)
     reason(3, "Black Carbon on Snow",
@@ -199,7 +201,7 @@ def draw_report():
     section_header("02", "RAINFALL", "#2471a3")
     gap(0.06)
     ax.text(0.65, Y[0],
-            "Annual rainfall dropped 2 to 6 percent and is arriving in heavier, shorter bursts",
+            "Rainfall fell at all five stations from 1990 to 2016, clearest at Gilgit",
             ha="left", va="top", fontsize=15, fontweight="bold",
             color="#2471a3", style="italic")
     Y[0] -= 0.32
@@ -230,30 +232,29 @@ def draw_report():
     section_header("03", "SNOWFALL", "#6c3483")
     gap(0.06)
     ax.text(0.65, Y[0],
-            "Snowfall dropped 5 to 9 percent at stations below 2,500 metres elevation",
+            "Snowfall fell 12 to 18 percent below 2,500 metres between the 1990s and 2010-16",
             ha="left", va="top", fontsize=15, fontweight="bold",
             color="#6c3483", style="italic")
     Y[0] -= 0.32
     gap(0.06)
 
-    reason(1, "Rain Replacing Snow",
-           "When temperatures rise above freezing at lower elevations, winter precipitation falls "
-           "as rain instead of snow. The altitude where rain turns to snow has been climbing higher "
-           "every decade. Farmers who relied on snowmelt for spring irrigation now get rain in "
-           "winter and dry fields in spring.",
+    reason(1, "Less Snow, Not More Rain",
+           "Rain totals did not rise to make up for the lost snow. The snow decline tracks the "
+           "overall drop in precipitation rather than a clean switch from snow to rain. Farmers "
+           "who rely on snowmelt for spring irrigation get less water either way.",
            "#6c3483")
     gap(0.06)
     reason(2, "Earlier Spring Melt",
-           "Snow that does fall is melting weeks earlier than in the 1990s. Rivers now peak in "
-           "March instead of May, meaning water is abundant when farmers do not need it and "
-           "scarce during the dry summer growing season when it is most needed.",
+           "Warmer springs melt snow earlier, shifting river flow away from the summer growing "
+           "season when farmers need it most. This dataset does not measure river flow, so it "
+           "cannot say how large that shift has been in GB.",
            "#6c3483")
     gap(0.06)
     reason(3, "Karakoram Anomaly Fading",
            "GB was famous for a unique pattern where its glaciers were growing while glaciers "
            "elsewhere in Asia shrank. Strong westerly winds were delivering extra winter snowfall. "
-           "The corrected data shows this protective effect is weakening as global warming "
-           "gradually overrides local wind patterns.",
+           "Research suggests this protective effect may be weakening. This dataset alone "
+           "cannot confirm it, since it has no glacier measurements.",
            "#6c3483")
     gap(0.22)
 
@@ -263,7 +264,7 @@ def draw_report():
     section_header("04", "WIND", "#1e8449")
     gap(0.06)
     ax.text(0.65, Y[0],
-            "Wind speeds increased slightly after 2016 and storm tracks are shifting away from GB",
+            "Wind was flat from 1990 to 2016; the changes after 2017 are the ERA5 break, not climate",
             ha="left", va="top", fontsize=15, fontweight="bold",
             color="#1e8449", style="italic")
     Y[0] -= 0.32
@@ -291,18 +292,18 @@ def draw_report():
 
     CONC = [
         ("#fef9e7", "The Real Warming is Modest but Real",
-         "GB is warming at +0.09°C per decade. Over 35 years "
-         "that adds up to roughly +0.3°C total. Small in number, "
-         "but meaningful for a glacier ecosystem that depends "
-         "on precise snow and water timing every season."),
+         "+0.08°C per decade over 35 years, about +0.3°C in "
+         "total. The fix also removes some real change, so the "
+         "true figure is likely higher. Small in number, but it "
+         "matters for an ecosystem built on snow and ice."),
         ("#eaf4fb", "The Bigger Risk is Water Timing",
-         "The real threat is not the temperature number itself. "
-         "Snow melts weeks earlier, rivers peak in the wrong "
-         "season, and rain arrives in destructive bursts instead "
-         "of steady showers that crops and soil can absorb."),
+         "The clearer signal is in water, not temperature. "
+         "Snowfall in the valleys fell 12 to 18 percent from "
+         "the 1990s to 2010-16, and rainfall fell too, so less "
+         "water is stored as snow for the growing season."),
         ("#fdf2f8", "Why the Data Had to Be Fixed",
-         "A satellite update in 2016 created a fake jump making "
-         "GB look like it warmed 16 times faster than reality. "
+         "An ERA5 update between 2016 and 2017 created a fake "
+         "jump making GB look like it warmed 17 times faster. "
          "The 2.35°C per decade result was a data error, not a "
          "climate signal. Fixing it was essential for accuracy."),
     ]
@@ -326,6 +327,11 @@ def draw_report():
             "Stations: Gilgit, Skardu, Hunza, Chilas, Khunjerab  |  1990 to 2024  |  Bias corrected",
             ha="center", va="center", fontsize=11.5,
             color="#7f8c8d", zorder=2)
+
+    # Crop the canvas to the content so the poster has no empty tail
+    bottom = Y[0] - 0.6
+    ax.set_ylim(bottom, 34)
+    fig.set_size_inches(24, 34 - bottom)
 
     # Final save
     print(f"Saving → {OUT}")

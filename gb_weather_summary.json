@@ -33,8 +33,8 @@
     "license": "CC BY 4.0 (Open-Meteo) — ERA5 © Copernicus Climate Change Service",
     "data_quality_notes": {
       "era5_discontinuity": {
-        "break_date": "2016-01-01",
-        "description": "ERA5 reanalysis has a known systematic discontinuity around 2016 caused by updates to the ECMWF data assimilation system and changes in satellite input streams. Over complex terrain like Gilgit-Baltistan this manifests as jumps in precipitation totals and temperature bias. The 'era5_period' column flags pre_2016 vs post_2016 rows. For ML training: either (a) use post-2016 data only, (b) add era5_period as a categorical feature, or (c) apply per-station bias correction between periods.",
+        "break_date": "2017-01-01",
+        "description": "ERA5 reanalysis has a known systematic discontinuity between 2016 and 2017 caused by updates to the ECMWF data assimilation system and changes in satellite input streams. Over complex terrain like Gilgit-Baltistan this manifests as jumps in precipitation totals and temperature bias. The 'era5_period' column flags pre_2017 vs post_2017 rows. For ML training: either (a) use post-2017 data only, (b) add era5_period as a categorical feature, or (c) apply per-station bias correction between periods.",
         "affected_variables": [
           "precipitation_sum",
           "rain_sum",
@@ -42,7 +42,7 @@
           "temperature_2m_mean",
           "cloud_cover_mean"
         ],
-        "recommendation": "Use era5_period as a covariate or train only on post_2016 data."
+        "recommendation": "Use era5_period as a covariate or train only on post_2017 data."
       },
       "mountain_terrain": "ERA5 grid resolution (~9km) cannot fully resolve the extreme elevation gradients of GB. Values at high-altitude stations like Khunjerab (4693m) should be treated as area-averaged estimates."
     }

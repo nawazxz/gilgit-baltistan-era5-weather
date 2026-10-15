@@ -87,10 +87,10 @@ DAILY_VARS = [
     "weather_code",
 ]
 
-# ERA5 reanalysis has a known discontinuity around 2016 (model/assimilation
+# ERA5 reanalysis has a known discontinuity between 2016 and 2017 (model/assimilation
 # update) that causes systematic shifts in precipitation and temperature over
 # complex mountain terrain. We flag each row so models can account for it.
-ERA5_BREAK_DATE = "2016-01-01"
+ERA5_BREAK_DATE = "2017-01-01"
 
 API_URL = "https://archive-api.open-meteo.com/v1/archive"
 
@@ -140,8 +140,8 @@ def fetch_station(station):
     return daily
 
 def era5_period(date_str):
-    """Flag ERA5 reanalysis period to mark the known 2016 discontinuity."""
-    return "post_2016" if date_str >= ERA5_BREAK_DATE else "pre_2016"
+    """Flag ERA5 reanalysis period to mark the known 2016/2017 discontinuity."""
+    return "post_2017" if date_str >= ERA5_BREAK_DATE else "pre_2017"
 
 def save_station_csv(station, daily):
     """Save per-station CSV."""
@@ -261,12 +261,12 @@ def save_summary(summaries):
                     "era5_discontinuity": {
                         "break_date": ERA5_BREAK_DATE,
                         "description": (
-                            "ERA5 reanalysis has a known systematic discontinuity around 2016 "
+                            "ERA5 reanalysis has a known systematic discontinuity between 2016 and 2017 "
                             "caused by updates to the ECMWF data assimilation system and changes "
                             "in satellite input streams. Over complex terrain like Gilgit-Baltistan "
                             "this manifests as jumps in precipitation totals and temperature bias. "
-                            "The 'era5_period' column flags pre_2016 vs post_2016 rows. "
-                            "For ML training: either (a) use post-2016 data only, "
+                            "The 'era5_period' column flags pre_2017 vs post_2017 rows. "
+                            "For ML training: either (a) use post-2017 data only, "
                             "(b) add era5_period as a categorical feature, or "
                             "(c) apply per-station bias correction between periods."
                         ),
@@ -274,7 +274,7 @@ def save_summary(summaries):
                             "precipitation_sum", "rain_sum", "snowfall_sum",
                             "temperature_2m_mean", "cloud_cover_mean"
                         ],
-                        "recommendation": "Use era5_period as a covariate or train only on post_2016 data."
+                        "recommendation": "Use era5_period as a covariate or train only on post_2017 data."
                     },
                     "mountain_terrain": (
                         "ERA5 grid resolution (~9km) cannot fully resolve the extreme "

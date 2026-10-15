@@ -1,23 +1,25 @@
 #!/usr/bin/env python3
 """
-GB Weather — Rolling Window + Decadal Trend + Pre/Post 2016 Analysis
+GB Weather — Rolling Window + Decadal Trend + Pre/Post 2017 Analysis
 =====================================================================
 Steps:
   1. Load bias-corrected dataset
   2. Apply 365-day rolling mean per station to remove seasonal noise
   3. Fit linear trends (numpy polyfit) per station per decade
-  4. Pre-2016 vs Post-2016 comparative analysis
+  4. Pre-2017 vs Post-2017 comparative analysis
   5. Print structured report with clear change identification
 """
 
+import os
+HERE = os.path.dirname(os.path.abspath(__file__))
 import csv
 import math
 import numpy as np
 from collections import defaultdict
 from datetime import datetime, date
 
-DATA_FILE = "/Users/mac/Desktop/gb_weather_dataset/gb_weather_corrected.csv"
-BREAK_YEAR = 2016
+DATA_FILE = os.path.join(HERE, "gb_weather_corrected.csv")
+BREAK_YEAR = 2017
 
 # Variables to analyse
 TEMP_VARS   = ["temperature_2m_max", "temperature_2m_min", "temperature_2m_mean"]
@@ -146,7 +148,7 @@ def compute_decadal_trends(annual_data):
             }
     return trends
 
-# ── Pre/Post 2016 stats ───────────────────────────────────────────────────────
+# ── Pre/Post 2017 stats ───────────────────────────────────────────────────────
 def pre_post_stats(station_rows, annual_data):
     """Returns {var: {pre: {...}, post: {...}, delta: float, pct_change: float, direction: str}}"""
     result = {}
@@ -255,7 +257,7 @@ def main():
     print("  GB WEATHER TREND ANALYSIS  (365-day rolling + decadal linear trend)")
     print("  Dataset  : gb_weather_corrected.csv (ERA5 bias-corrected)")
     print("  Stations : Chilas, Gilgit, Hunza, Khunjerab, Skardu")
-    print("  Period   : 1990–2024  |  Break: 2016")
+    print("  Period   : 1990–2024  |  Break: 2017")
     print("=" * 72)
 
     print("\nLoading data...")
@@ -284,7 +286,7 @@ def main():
         print(f"  Fitting decadal trends (numpy polyfit degree-1)...")
         decade_trends = compute_decadal_trends(annual)
 
-        print(f"  Computing pre-2016 vs post-2016 statistics...")
+        print(f"  Computing pre-2017 vs post-2017 statistics...")
         pp = pre_post_stats(rows, annual)
         all_station_results[station] = {"annual": annual, "decade_trends": decade_trends, "pre_post": pp}
 
@@ -314,8 +316,8 @@ def main():
         print("\n  * 2020s = 2020–2024 only (partial decade, treat with caution)")
         print("  Significance: *** R²≥0.7  ** R²≥0.4  * R²≥0.2")
 
-        # ── Pre/Post 2016 comparison ──
-        subsection("PRE-2016 vs POST-2016 COMPARISON  (365-day smoothed annual means)")
+        # ── Pre/Post 2017 comparison ──
+        subsection("PRE-2017 vs POST-2017 COMPARISON  (365-day smoothed annual means)")
         print(f"\n  {'Variable':<22} {'Pre Mean':>10} {'Post Mean':>10} {'Δ Change':>10} "
               f"{'% Change':>10} {'Direction':>10} {'Pre Trend/dec':>15} {'Post Trend/dec':>15}")
         print("  " + "-" * 100)
@@ -354,10 +356,10 @@ def main():
             pre_t = temp_mean.get("pre_trend_per_decade")
             pst_t = temp_mean.get("post_trend_per_decade")
             findings.append(
-                f"  TEMPERATURE  Mean temp shifted {d:+.2f}°C ({pct:+.1f}%) post-2016.\n"
-                f"               Pre-2016 warming rate: {pre_t:+.3f}°C/decade  →  "
-                f"Post-2016: {pst_t:+.3f}°C/decade" if pre_t and pst_t else
-                f"  TEMPERATURE  Mean temp shifted {d:+.2f}°C ({pct:+.1f}%) post-2016."
+                f"  TEMPERATURE  Mean temp shifted {d:+.2f}°C ({pct:+.1f}%) post-2017.\n"
+                f"               Pre-2017 warming rate: {pre_t:+.3f}°C/decade  →  "
+                f"Post-2017: {pst_t:+.3f}°C/decade" if pre_t and pst_t else
+                f"  TEMPERATURE  Mean temp shifted {d:+.2f}°C ({pct:+.1f}%) post-2017."
             )
 
         if precip:
@@ -365,7 +367,7 @@ def main():
             pct = precip["pct_change"]
             vc = precip.get("volatility_change", 0)
             findings.append(
-                f"  PRECIPITATION  Annual total changed {d:+.2f}mm ({pct:+.1f}%) post-2016.\n"
+                f"  PRECIPITATION  Annual total changed {d:+.2f}mm ({pct:+.1f}%) post-2017.\n"
                 f"               Variability (std) {'increased' if vc > 0 else 'decreased'} "
                 f"by {abs(vc):.2f}mm — {'more' if vc > 0 else 'less'} erratic rainfall."
             )
@@ -373,27 +375,27 @@ def main():
         if snow:
             d = snow["delta"]
             pct = snow["pct_change"]
-            findings.append(f"  SNOWFALL     Annual snowfall changed {d:+.2f}cm ({pct:+.1f}%) post-2016.")
+            findings.append(f"  SNOWFALL     Annual snowfall changed {d:+.2f}cm ({pct:+.1f}%) post-2017.")
 
         if cloud:
             d = cloud["delta"]
-            findings.append(f"  CLOUD COVER  Changed {d:+.1f}% post-2016 "
+            findings.append(f"  CLOUD COVER  Changed {d:+.1f}% post-2017 "
                             f"({'cloudier' if d > 0 else 'clearer'} skies).")
 
         if rad:
             d = rad["delta"]
             pct = rad["pct_change"]
-            findings.append(f"  SOLAR RAD    Shortwave radiation changed {d:+.2f}MJ/m² ({pct:+.1f}%) post-2016.")
+            findings.append(f"  SOLAR RAD    Shortwave radiation changed {d:+.2f}MJ/m² ({pct:+.1f}%) post-2017.")
 
         if wind:
             d = wind["delta"]
             pct = wind["pct_change"]
-            findings.append(f"  WIND         Mean wind speed changed {d:+.2f}km/h ({pct:+.1f}%) post-2016.")
+            findings.append(f"  WIND         Mean wind speed changed {d:+.2f}km/h ({pct:+.1f}%) post-2017.")
 
         if et0:
             d = et0["delta"]
             pct = et0["pct_change"]
-            findings.append(f"  EVAPOTRANS   ET₀ changed {d:+.2f}mm ({pct:+.1f}%) post-2016 "
+            findings.append(f"  EVAPOTRANS   ET₀ changed {d:+.2f}mm ({pct:+.1f}%) post-2017 "
                             f"— {'more' if d > 0 else 'less'} atmospheric water demand.")
 
         for f in findings:
@@ -438,9 +440,9 @@ def main():
     print("  • 365-day rolling window applied before all statistics (noise reduction)")
     print("  • Linear trends: numpy.polyfit(degree=1) on annual smoothed means")
     print("  • Trend units: change per decade (slope × 10)")
-    print("  • Pre-2016 period: 1990–2015 (26 years)")
-    print("  • Post-2016 period: 2016–2024 (9 years)")
-    print("  • All data bias-corrected (ERA5 2016 discontinuity removed)")
+    print("  • Pre-2017 period: 1990–2016 (27 years)")
+    print("  • Post-2017 period: 2017–2024 (8 years)")
+    print("  • All data bias-corrected (ERA5 2016/2017 discontinuity removed)")
     print()
 
 if __name__ == "__main__":

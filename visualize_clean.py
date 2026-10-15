@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-ERA5 2016 Discontinuity — Clean Accurate Visualization
+ERA5 2016/2017 Discontinuity — Clean Accurate Visualization
 =======================================================
 Noise reduction pipeline:
   1. Aggregate daily → annual means (removes seasonal cycle entirely)
   2. Apply 3-year rolling mean on annual data (smooths inter-annual noise)
-  3. Fit separate linear trends pre/post 2016 via numpy polyfit
+  3. Fit separate linear trends pre/post 2017 via numpy polyfit
   4. Show annual dots + smoothed line + trend lines + jump quantification
 
 Output files:
@@ -14,6 +14,8 @@ Output files:
   clean_jump_proof.png    — side-by-side raw vs corrected jump proof
 """
 
+import os
+HERE = os.path.dirname(os.path.abspath(__file__))
 import csv, math, json
 import numpy as np
 import matplotlib
@@ -24,13 +26,13 @@ from matplotlib.lines import Line2D
 from collections import defaultdict
 from datetime import datetime
 
-RAW_FILE  = "/Users/mac/Desktop/gb_weather_dataset/gb_weather_combined.csv"
-CORR_FILE = "/Users/mac/Desktop/gb_weather_dataset/gb_weather_corrected.csv"
-REPORT    = "/Users/mac/Desktop/gb_weather_dataset/bias_correction_report.json"
+RAW_FILE  = os.path.join(HERE, "gb_weather_combined.csv")
+CORR_FILE = os.path.join(HERE, "gb_weather_corrected.csv")
+REPORT    = os.path.join(HERE, "bias_correction_report.json")
 
 STATIONS  = ["Gilgit", "Skardu", "Hunza", "Chilas", "Khunjerab"]
 ELEVATIONS= {"Gilgit":1500,"Skardu":2228,"Hunza":2438,"Chilas":1250,"Khunjerab":4693}
-BREAK     = 2016
+BREAK     = 2017
 
 PALETTE = {
     "Gilgit":    "#e74c3c",
@@ -122,7 +124,7 @@ def plot_temperature():
     fig, axes = plt.subplots(len(STATIONS), 2, figsize=(18, 4*len(STATIONS)),
                               facecolor=C_BG, sharex=False)
     fig.suptitle("Mean Temperature — Raw ERA5  vs  Bias-Corrected\n"
-                 "Annual means + 3-year rolling smooth + linear trend lines (pre/post 2016)",
+                 "Annual means + 3-year rolling smooth + linear trend lines (pre/post 2017)",
                  fontsize=14, fontweight="bold", y=1.005)
 
     for row_i, station in enumerate(STATIONS):
@@ -130,7 +132,7 @@ def plot_temperature():
         col  = PALETTE[station]
 
         for col_i, (data, panel_label) in enumerate([
-            (raw,  "RAW  (with ERA5 2016 jump)"),
+            (raw,  "RAW  (with ERA5 2017 jump)"),
             (corr, "CORRECTED  (jump removed)"),
         ]):
             ax = axes[row_i][col_i]
@@ -223,7 +225,7 @@ def plot_temperature():
             ax.xaxis.set_major_locator(matplotlib.ticker.MultipleLocator(5))
 
     plt.tight_layout(rect=[0,0,1,0.99])
-    path = "/Users/mac/Desktop/gb_weather_dataset/clean_temperature.png"
+    path = os.path.join(HERE, "clean_temperature.png")
     fig.savefig(path, dpi=150, bbox_inches="tight", facecolor=C_BG)
     print(f"  Saved → {path}")
     plt.close(fig)
@@ -237,7 +239,7 @@ def plot_precipitation():
     fig, axes = plt.subplots(len(STATIONS), 2, figsize=(18, 4*len(STATIONS)),
                               facecolor=C_BG)
     fig.suptitle("Annual Precipitation — Raw ERA5  vs  Bias-Corrected\n"
-                 "Annual totals + 3-year rolling smooth + linear trend lines (pre/post 2016)",
+                 "Annual totals + 3-year rolling smooth + linear trend lines (pre/post 2017)",
                  fontsize=14, fontweight="bold", y=1.005)
 
     for row_i, station in enumerate(STATIONS):
@@ -245,7 +247,7 @@ def plot_precipitation():
         col  = PALETTE[station]
 
         for col_i, (data, panel_label) in enumerate([
-            (raw,  "RAW  (with ERA5 2016 jump)"),
+            (raw,  "RAW  (with ERA5 2017 jump)"),
             (corr, "CORRECTED  (jump removed)"),
         ]):
             ax = axes[row_i][col_i]
@@ -331,7 +333,7 @@ def plot_precipitation():
             ax.xaxis.set_major_locator(matplotlib.ticker.MultipleLocator(5))
 
     plt.tight_layout(rect=[0,0,1,0.99])
-    path = "/Users/mac/Desktop/gb_weather_dataset/clean_precipitation.png"
+    path = os.path.join(HERE, "clean_precipitation.png")
     fig.savefig(path, dpi=150, bbox_inches="tight", facecolor=C_BG)
     print(f"  Saved → {path}")
     plt.close(fig)
@@ -353,8 +355,8 @@ def plot_jump_proof():
     fig, axes = plt.subplots(n_vars, len(STATIONS),
                               figsize=(22, 3.5*n_vars), facecolor=C_BG)
     fig.suptitle(
-        "ERA5 2016 Jump — All Variables  |  Annual Aggregated + 3-Year Smooth\n"
-        "Orange = raw  |  Blue = corrected  |  Dashed red = 2016 break  |  Lines = trend",
+        "ERA5 2017 Jump — All Variables  |  Annual Aggregated + 3-Year Smooth\n"
+        "Orange = raw  |  Blue = corrected  |  Dashed red = 2017 break  |  Lines = trend",
         fontsize=13, fontweight="bold", y=1.005
     )
 
@@ -441,15 +443,15 @@ def plot_jump_proof():
     legend_handles = [
         Line2D([0],[0], color="#e67e22", lw=2, label="Raw (with jump)"),
         Line2D([0],[0], color="#2980b9", lw=2, ls="--", label="Bias-corrected"),
-        Line2D([0],[0], color=C_BREAK,  lw=1.5, ls="--", label="2016 break"),
-        mpatches.Patch(color=C_PRE,  alpha=0.5, label="Pre-2016"),
-        mpatches.Patch(color=C_POST, alpha=0.5, label="Post-2016"),
+        Line2D([0],[0], color=C_BREAK,  lw=1.5, ls="--", label="2017 break"),
+        mpatches.Patch(color=C_PRE,  alpha=0.5, label="Pre-2017"),
+        mpatches.Patch(color=C_POST, alpha=0.5, label="Post-2017"),
     ]
     fig.legend(handles=legend_handles, loc="lower center", ncol=5,
                fontsize=9, framealpha=0.9, bbox_to_anchor=(0.5,-0.01))
 
     plt.tight_layout(rect=[0,0,1,0.995])
-    path = "/Users/mac/Desktop/gb_weather_dataset/clean_jump_proof.png"
+    path = os.path.join(HERE, "clean_jump_proof.png")
     fig.savefig(path, dpi=150, bbox_inches="tight", facecolor=C_BG)
     print(f"  Saved → {path}")
     plt.close(fig)
@@ -464,12 +466,12 @@ def plot_decade_bars():
     prec_corr = annual_agg(CORR_FILE, "precipitation_sum",   "sum")
 
     decades = {"1990s":(1990,1999),"2000s":(2000,2009),
-               "2010s":(2010,2015),"2016+":(2016,2024)}
+               "2010s":(2010,2016),"2017+":(2017,2024)}
 
     fig, axes = plt.subplots(2, len(STATIONS), figsize=(20, 9), facecolor=C_BG)
     fig.suptitle(
         "Decadal Mean Comparison — Raw vs Corrected\n"
-        "Reveals how the ERA5 jump inflates post-2016 statistics in raw data",
+        "Reveals how the ERA5 jump inflates post-2017 statistics in raw data",
         fontsize=13, fontweight="bold", y=1.01
     )
 
@@ -511,8 +513,8 @@ def plot_decade_bars():
                 ax.text(bar.get_x() + bar.get_width()/2, h + abs(h)*0.005,
                         f"{h:.1f}", ha="center", va="bottom", fontsize=7.5)
 
-            # Highlight 2016+ bar pair — show the difference
-            idx_2016 = dec_labels.index("2016+") if "2016+" in dec_labels else None
+            # Highlight 2017+ bar pair — show the difference
+            idx_2016 = dec_labels.index("2017+") if "2017+" in dec_labels else None
             if idx_2016 is not None:
                 diff = raw_means[idx_2016] - corr_means[idx_2016]
                 ax.annotate(
@@ -534,7 +536,7 @@ def plot_decade_bars():
                 ax.legend(fontsize=8, loc="upper right")
 
     plt.tight_layout(rect=[0,0,1,0.995])
-    path = "/Users/mac/Desktop/gb_weather_dataset/clean_decades.png"
+    path = os.path.join(HERE, "clean_decades.png")
     fig.savefig(path, dpi=150, bbox_inches="tight", facecolor=C_BG)
     print(f"  Saved → {path}")
     plt.close(fig)

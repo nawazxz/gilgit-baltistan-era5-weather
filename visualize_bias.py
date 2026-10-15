@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-ERA5 2016 Discontinuity — Visual Proof of Jump + Fix
+ERA5 2016/2017 Discontinuity — Visual Proof of Jump + Fix
 =====================================================
 Plots raw vs corrected data with 365-day rolling window
 for all 5 stations and key variables.
@@ -8,6 +8,8 @@ for all 5 stations and key variables.
 Output: bias_correction_visual.png
 """
 
+import os
+HERE = os.path.dirname(os.path.abspath(__file__))
 import csv
 import math
 import numpy as np
@@ -19,18 +21,18 @@ from matplotlib.gridspec import GridSpec
 from collections import defaultdict
 from datetime import datetime
 
-RAW_FILE  = "/Users/mac/Desktop/gb_weather_dataset/gb_weather_combined.csv"
-CORR_FILE = "/Users/mac/Desktop/gb_weather_dataset/gb_weather_corrected.csv"
-OUT_PNG   = "/Users/mac/Desktop/gb_weather_dataset/bias_correction_visual.png"
+RAW_FILE  = os.path.join(HERE, "gb_weather_combined.csv")
+CORR_FILE = os.path.join(HERE, "gb_weather_corrected.csv")
+OUT_PNG   = os.path.join(HERE, "bias_correction_visual.png")
 
 STATIONS  = ["Gilgit", "Skardu", "Hunza", "Chilas", "Khunjerab"]
-BREAK     = datetime(2016, 1, 1)
+BREAK     = datetime(2017, 1, 1)
 
 # Colours
 C_RAW    = "#e07b54"   # warm orange — raw/broken
 C_CORR   = "#4a90d9"   # cool blue   — corrected
-C_BREAK  = "#cc3333"   # red dashed  — 2016 line
-C_SHADE  = "#ffeeee"   # light pink  — pre-2016 zone
+C_BREAK  = "#cc3333"   # red dashed  — 2017 break line
+C_SHADE  = "#ffeeee"   # light pink  — pre-2017 zone
 C_BG     = "#f8f9fb"
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -84,7 +86,7 @@ def main():
     # Layout: 2 variable columns × n_stations rows  + 1 summary row at top
     fig = plt.figure(figsize=(20, 4 + 4 * n_stations), facecolor=C_BG)
     fig.suptitle(
-        "ERA5 2016 Discontinuity — Raw vs Bias-Corrected  |  Gilgit-Baltistan  1990–2024\n"
+        "ERA5 2016/2017 Discontinuity — Raw vs Bias-Corrected  |  Gilgit-Baltistan  1990–2024\n"
         "365-day rolling mean applied to reveal systematic jump",
         fontsize=15, fontweight="bold", y=0.995, va="top"
     )
@@ -116,7 +118,7 @@ def main():
             _, smooth_r = rolling(dates_r, vals_r)
             _, smooth_c = rolling(dates_c, vals_c)
 
-            # Shade pre-2016 region
+            # Shade pre-2017 region
             ax.axvspan(dates_r[0], BREAK, color=C_SHADE, alpha=0.6, zorder=0)
 
             # Raw line
@@ -126,11 +128,11 @@ def main():
             ax.plot(dates_c, smooth_c, color=C_CORR, lw=1.6, alpha=0.90,
                     label="Corrected",   zorder=3, linestyle="--")
 
-            # 2016 break line
+            # 2017 break line
             ax.axvline(BREAK, color=C_BREAK, lw=1.5, linestyle=":", zorder=4)
 
             # Annotate the jump
-            # Find mean of last 2 years of raw pre-2016 vs first 2 years post-2016
+            # Find mean of last 2 years of raw pre-2017 vs first 2 years post-2017
             pre_vals  = [v for d, v in zip(dates_r, smooth_r)
                          if v is not None and datetime(2014,1,1) <= d < BREAK]
             post_vals = [v for d, v in zip(dates_r, smooth_r)
@@ -158,7 +160,7 @@ def main():
                 residual = abs((sum(post_raw)/len(post_raw)) - (sum(post_cor)/len(post_cor)))
                 unit = "°C" if "Temp" in var_label else "mm"
                 ax.text(0.97, 0.06,
-                        f"Post-2016 residual: {residual:.3f}{unit}",
+                        f"Post-2017 residual: {residual:.3f}{unit}",
                         transform=ax.transAxes, fontsize=7.5,
                         ha="right", va="bottom", color="#555",
                         bbox=dict(fc="white", ec="#ccc", pad=2, alpha=0.8))
@@ -183,7 +185,7 @@ def main():
                           handles=[
                               mpatches.Patch(color=C_RAW,  label="Raw (with jump)"),
                               mpatches.Patch(color=C_CORR, label="Bias-corrected"),
-                              mpatches.Patch(color=C_SHADE, alpha=0.6, label="Pre-2016 period"),
+                              mpatches.Patch(color=C_SHADE, alpha=0.6, label="Pre-2017 period"),
                           ])
 
     # ── Bottom annotation ──────────────────────────────────────────────────────
@@ -202,15 +204,15 @@ def main():
     plot_jump_zoom(raw_temp, cor_temp, raw_precip, cor_precip)
 
 def plot_jump_zoom(raw_temp, cor_temp, raw_precip, cor_precip):
-    """Zoomed ±4 years around 2016 break showing the discontinuity clearly."""
-    OUT2 = "/Users/mac/Desktop/gb_weather_dataset/bias_jump_zoom.png"
+    """Zoomed ±4 years around 2017 break showing the discontinuity clearly."""
+    OUT2 = os.path.join(HERE, "bias_jump_zoom.png")
 
     WIN_START = datetime(2012, 1, 1)
     WIN_END   = datetime(2020, 6, 1)
 
     fig, axes = plt.subplots(2, len(STATIONS), figsize=(22, 8), facecolor=C_BG)
     fig.suptitle(
-        "ERA5 2016 Jump — Zoomed View ±4 Years Around Break\n"
+        "ERA5 2017 Jump — Zoomed View ±4 Years Around Break\n"
         "Orange = raw data with discontinuity  |  Blue dashed = bias-corrected",
         fontsize=13, fontweight="bold", y=1.01
     )
@@ -301,9 +303,9 @@ def plot_jump_zoom(raw_temp, cor_temp, raw_precip, cor_precip):
 def plot_correction_heatmap():
     """Show the monthly correction deltas as a heatmap — temperature and precip ratio."""
     import json
-    OUT3 = "/Users/mac/Desktop/gb_weather_dataset/bias_heatmap.png"
+    OUT3 = os.path.join(HERE, "bias_heatmap.png")
 
-    with open("/Users/mac/Desktop/gb_weather_dataset/bias_correction_report.json") as f:
+    with open(os.path.join(HERE, "bias_correction_report.json")) as f:
         report = json.load(f)
 
     fig, axes = plt.subplots(1, 2, figsize=(16, 5), facecolor=C_BG)

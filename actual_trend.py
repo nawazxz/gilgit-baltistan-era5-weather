@@ -4,12 +4,14 @@ What is the ACTUAL warming trend in GB — corrected data, full period.
 Compares: raw trend (what shocked you) vs corrected trend (reality).
 """
 
+import os
+HERE = os.path.dirname(os.path.abspath(__file__))
 import csv, math
 import numpy as np
 from collections import defaultdict
 
-RAW_FILE  = "/Users/mac/Desktop/gb_weather_dataset/gb_weather_combined.csv"
-CORR_FILE = "/Users/mac/Desktop/gb_weather_dataset/gb_weather_corrected.csv"
+RAW_FILE  = os.path.join(HERE, "gb_weather_combined.csv")
+CORR_FILE = os.path.join(HERE, "gb_weather_corrected.csv")
 
 STATIONS = ["Gilgit", "Skardu", "Hunza", "Chilas", "Khunjerab"]
 
@@ -62,7 +64,7 @@ for var, label, unit in [
     ("temperature_2m_mean", "Mean Temperature",  "°C"),
     ("temperature_2m_max",  "Max Temperature",   "°C"),
     ("temperature_2m_min",  "Min Temperature",   "°C"),
-    ("precipitation_sum",   "Precipitation",     "mm/yr"),
+    ("precipitation_sum",   "Precipitation",     "mm/day"),
 ]:
     raw_data  = annual_means(RAW_FILE,  var)
     corr_data = annual_means(CORR_FILE, var)
@@ -112,7 +114,7 @@ for var, label, unit in [
               f"{gb_raw-gb_corr:>+10.3f}{unit}  ← GB-wide inflation")
         if label == "Mean Temperature":
             print(f"\n  ┌─────────────────────────────────────────────────────────────────┐")
-            print(f"  │  Your model saw    : {gb_raw:+.3f}°C/decade  (raw, with 2016 jump)    │")
+            print(f"  │  Your model saw    : {gb_raw:+.3f}°C/decade  (raw, with 2017 jump)    │")
             print(f"  │  ACTUAL trend is   : {gb_corr:+.3f}°C/decade  (bias-corrected)         │")
             print(f"  │  The jump added    : {gb_raw-gb_corr:+.3f}°C/decade  FAKE warming              │")
             print(f"  └─────────────────────────────────────────────────────────────────┘")
@@ -121,21 +123,23 @@ print(f"\n{'─'*70}")
 print("  INTERPRETATION")
 print(f"{'─'*70}")
 print("""
-  The ERA5 2016 jump is a STEP CHANGE, not a gradual trend.
+  The ERA5 2017 jump is a STEP CHANGE, not a gradual trend.
   When your model fit a straight line over 1990-2024 on raw data,
   the step inflated the slope — it looked like fast warming because
   the line was trying to connect a low 1990s baseline to an
-  artificially high post-2016 level.
+  artificially high post-2017 level.
 
   After bias correction:
-  • The pre-2016 data is lifted to match post-2016 baseline
+  • The pre-2017 data is shifted onto the post-2017 baseline
   • The full series is now continuous
-  • The real slope is lower — genuine long-term warming, not an artefact
+  • The slope is far lower
 
-  What 0.2–0.4°C/decade actually means for GB:
-  • Still significant — 0.2°C/dec = +0.7°C over 35 years
-  • Consistent with IPCC HKH (Hindu Kush Himalaya) regional estimates
-    of 0.2–0.5°C/decade for high mountain Asia
-  • The REAL number is scientifically defensible
-  • The 2.35°C/decade you saw was ~5–10× too high
+  How to read the corrected number:
+  • It is conservative. Matching monthly means across the break also
+    removes any real change between 1990-2016 and 2017-2024, so the
+    true warming is likely higher than the corrected slope.
+  • It is below the 0.2-0.5°C/decade usually reported for the Hindu
+    Kush Himalaya, which is a reason to treat it as a lower bound,
+    not as evidence that GB is warming slowly.
+  • The raw slope is an artefact either way. Do not use it.
 """)
